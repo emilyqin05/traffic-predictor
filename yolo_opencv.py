@@ -7,14 +7,14 @@ ap = argparse.ArgumentParser()
 ap.add_argument('-i', '--image', required = True, help = 'path to input image') #add_argument( <command-line flags>, <requirement to run>, description of argument>)
 ap.add_argument('-c', '--config', required = True, help = 'path to yolo config file')
 ap.add_argument('-w', '--weights', required = True, help = 'path to yolo pre-trained weights')
-ap.add_argument('cl', '--classes', required = True, help = 'path to text file containing class names')
+ap.add_argument('-cl', '--classes', required = True, help = 'path to text file containing class names')
 args = ap.parse_args()
 
 # reading input image using opencv's imread function
 image = cv2.imread(args.image)
 #image.shape returns a tuple with (<height>, <width>, <# of channels>)
-Height = image.shape[0]
 Width = image.shape[1]
+Height = image.shape[0]
 # normalized scale factor (approx. 1/255)
 # multiplying each pixel value by 0.00392 converts the value from the range [0, 255] to [0, 1].
 scale = 0.00392
@@ -41,15 +41,23 @@ blob = cv2.dnn.blobFromImage(image, scale, (416, 416), (0,0,0), True, crop = Fal
 net.setInput(blob)
 
 
-# function to get the output layer names 
-# in the architecture
 def get_output_layers(net):
-    
+    # Get names of all layers
     layer_names = net.getLayerNames()
-    
-    output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+
+    # Get indices of the output layers
+    out_layer_indices = net.getUnconnectedOutLayers()
+
+    # Check if out_layer_indices is a list of lists (older OpenCV versions) or a list of integers (newer versions)
+    if isinstance(out_layer_indices[0], list):
+        # Flatten the list if it's nested
+        out_layer_indices = [item for sublist in out_layer_indices for item in sublist]
+
+    # Get the output layer names
+    output_layers = [layer_names[i - 1] for i in out_layer_indices]
 
     return output_layers
+
 
 # function to draw bounding box on the detected object with class name
 def draw_bounding_box(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
@@ -96,17 +104,20 @@ for out in outs:
 # apply non-max suppression
 indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
 
-# go through the detections remaining
-# after nms and draw bounding box
+# Go through the detections remaining after NMS and draw bounding boxes
 for i in indices:
-    i = i[0]
+    # `i` is already a scalar, use it directly
+    i = int(i)  # Ensure `i` is an integer if it's not already
+
+    # Access the bounding box
     box = boxes[i]
     x = box[0]
     y = box[1]
     w = box[2]
     h = box[3]
     
-    draw_bounding_box(image, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
+    # Draw the bounding box on the image
+    draw_bounding_box(image, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
 
 # display output image    
 cv2.imshow("object detection", image)
