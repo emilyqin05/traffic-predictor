@@ -111,19 +111,6 @@ for out in outs:
             boxes.append([x, y, w, h])
 
 
-# Find the class ID for "Car"
-car_class_name = "Car"
-car_class_id = None
-for i, name in enumerate(class_names):
-    if name == car_class_name:
-        car_class_id = i
-        break
-
-if car_class_id is not None:
-    print(f"Class ID for '{car_class_name}' is: {car_class_id}")
-else:
-    print(f"'{car_class_name}' not found in class names list.")
-
 
 # apply non-max suppression to filter out overlapping bounding boxes.
 # boxes - list of bounding boxes '[x, y, w, h]'
