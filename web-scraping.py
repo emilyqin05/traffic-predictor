@@ -27,10 +27,10 @@ im = Image.open(BytesIO(png))
 
 # Define crop points 
 left = 20
-top = 200
-right = 320
-bottom = 500
-im = im.crop((left, top, right, bottom))
+top = 300
+width = 650
+height = 650
+im = im.crop((left, top, (left + width) , (top + height)))
 
 # Save the cropped image
 im.save('cropped_screenshot.png')
