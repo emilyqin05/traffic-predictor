@@ -118,8 +118,9 @@ for out in outs:
 # conf_threshold - minimum confidence score
 # nms_threshold - if intersection over union (IoU) bt 2 boxes is greater than threshold, one box will be suppressed.
 indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
-
-# Go through the detections remaining after NMS and draw bounding boxes
+num_objects = len(indices)
+print(f"Number of detected objects: {num_objects}")
+"""# Go through the detections remaining after NMS and draw bounding boxes
 for i in indices:
     # `i` is already a scalar, use it directly
     i = int(i)  # Ensure `i` is an integer if it's not already
@@ -148,6 +149,6 @@ cv2.waitKey()
     
  # save output image to disk
 cv2.imwrite("carOutput.jpg", image)
-
+"""
 # release resources
 cv2.destroyAllWindows()
