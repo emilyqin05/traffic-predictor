@@ -1,23 +1,52 @@
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from PIL import Image
+from io import BytesIO
+
 import cv2
 import argparse
 import numpy as np
 import csv
 import datetime
-"""
-# command line args
-ap = argparse.ArgumentParser()
-ap.add_argument('-i', '--image', required = True, help = 'path to input image') #add_argument( <command-line flags>, <requirement to run>, description of argument>)
-ap.add_argument('-c', '--config', required = True, help = 'path to yolo config file')
-ap.add_argument('-w', '--weights', required = True, help = 'path to yolo pre-trained weights')
-ap.add_argument('-cl', '--classes', required = True, help = 'path to text file containing class names')
-args = ap.parse_args()"""
+import time
+
+# Set up the ChromeDriver service
+service = Service(ChromeDriverManager().install())
+
+# Initialize the Chrome WebDriver using the service
+driver = webdriver.Chrome(service=service)
+
+# Visit the webpage
+driver.get("https://www.drivebc.ca/mobile/pub/webcams/id/684.html")
+
+# Save screenshot of the entire page as a PNG
+png = driver.get_screenshot_as_png()
+
+# Open the image in memory with PIL library
+im = Image.open(BytesIO(png))
+
+# Define crop points 
+left = 20
+top = 300
+width = 650
+height = 650
+im = im.crop((left, top, (left + width) , (top + height)))
+
+# Save the cropped image
+im.save('cropped_screenshot.png')
+
+# Close the browser
+driver.quit()
+
+
+time.sleep(5)
 
 # hardcoded paths to input image, config, weights, and classes
 image_path = 'cropped_screenshot.png'
 config_path = 'yolov3.cfg'
 weights_path = 'yolov3.weights'
 classes_path = 'yolov3.txt'
-
 
 # reading input image using opencv's imread function
 image = cv2.imread(image_path)
@@ -48,7 +77,6 @@ blob = cv2.dnn.blobFromImage(image, scale, (416, 416), (0,0,0), True, crop = Fal
 # sets the input blob for the network
 # represents that the network is ready to process input image encapsulated in blob for object detection
 net.setInput(blob)
-
 
 def get_output_layers(net):
     # list of all the layer names in the neural network
@@ -129,36 +157,7 @@ for out in outs:
 indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
 num_objects = len(indices)
 #print(f"Number of detected objects: {num_objects}")
-"""# Go through the detections remaining after NMS and draw bounding boxes
-for i in indices:
-    # `i` is already a scalar, use it directly
-    i = int(i)  # Ensure `i` is an integer if it's not already
 
-    # Access the bounding box
-    box = boxes[i]
-    # extract the x coord of the top left corner
-    x = box[0]
-    # extract the y coord of the top left corner
-    y = box[1]
-    # extract width
-    w = box[2]
-    # extract height
-    h = box[3]
-    
-    # Draw the bounding box on the image
-    # <image (on which to draw the bounding box)>, <class ID of detected object>, <confidence score for detection>, <coords for top left + bottom right corners>
-    draw_bounding_box(image, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
-
-# display the image with the drawn bounding boxes in a window titled "object detection."
-# cv2.imshow(<window title>, <og image>)
-cv2.imshow("object detection", image)
-
-# wait until any key is pressed
-cv2.waitKey()
-    
- # save output image to disk
-cv2.imwrite("carOutput.jpg", image)
-"""
 # release resources
 cv2.destroyAllWindows()
 
