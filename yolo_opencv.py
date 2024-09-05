@@ -1,6 +1,8 @@
 import cv2
 import argparse
 import numpy as np
+import csv
+import datetime
 
 # command line args
 ap = argparse.ArgumentParser()
@@ -119,7 +121,7 @@ for out in outs:
 # nms_threshold - if intersection over union (IoU) bt 2 boxes is greater than threshold, one box will be suppressed.
 indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
 num_objects = len(indices)
-print(f"Number of detected objects: {num_objects}")
+#print(f"Number of detected objects: {num_objects}")
 """# Go through the detections remaining after NMS and draw bounding boxes
 for i in indices:
     # `i` is already a scalar, use it directly
@@ -152,3 +154,12 @@ cv2.imwrite("carOutput.jpg", image)
 """
 # release resources
 cv2.destroyAllWindows()
+
+x = datetime.datetime.now()
+date = x.strftime("%x")
+time = x.strftime("%X")
+
+fields=[date,time,num_objects]
+with open('information.csv', 'a') as f:
+    writer = csv.writer(f)
+    writer.writerow(fields)
