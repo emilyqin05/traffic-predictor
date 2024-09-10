@@ -2,7 +2,7 @@ name: run main.py
 
 on:
   schedule:
-    - cron: '*/10 * * * *' #- cron: '*/5 7-16 * * 1-5' # every 5 minutes from 7AM to 4PM from Monday to Friday
+    - cron: '*/10 * * * *'
 
 jobs:
   build:
@@ -15,10 +15,11 @@ jobs:
       - name: Install latest stable Google Chrome
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable  # Install the latest stable version of Chrome
+          sudo apt-get install -y google-chrome-stable  
+          google-chrome --version  # Print version to verify installation
 
       - name: Setup Python 3.9
-        uses: actions/setup-python@v4  # Ensure compatibility with the latest Node.js version
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
@@ -28,6 +29,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Python script
+        env:
+          WDM_LOG_LEVEL: 0  # Reduce log verbosity for WebDriverManager
         run: python main.py
 
       - name: Commit and push updated files (if necessary)
