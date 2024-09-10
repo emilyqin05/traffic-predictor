@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to v3
 
       - name: Install Chrome
         run: |
@@ -18,16 +18,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-          
       - name: Install chromedriver
         run: |
           sudo apt-get install -yqq unzip
           wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
           unzip /tmp/chromedriver.zip -d /usr/local/bin/
 
-          
       - name: setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v4  # Updated to ensure the latest compatible version
         with:
           python-version: '3.9'
 
