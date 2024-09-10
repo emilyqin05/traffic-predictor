@@ -40,7 +40,7 @@ im.save('cropped_screenshot.png')
 driver.quit()
 
 
-time.sleep(5)
+#time.sleep(3)
 
 # hardcoded paths to input image, config, weights, and classes
 image_path = 'cropped_screenshot.png'
