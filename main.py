@@ -181,7 +181,7 @@ def job_scheduler():
     # Define conditions for Monday-Friday (0-4) and the two time ranges
     if 0 <= current_day <= 4:
         # Run only between 7-9 AM or 3-5 PM
-        if (0 <= current_hour < 9) or (15 <= current_hour < 17):
+        if (7 <= current_hour < 9) or (15 <= current_hour < 17):
             take_screenshot_and_update_csv()
 
 # Schedule the job every 2 minutes but only execute it during valid hours
