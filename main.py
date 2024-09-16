@@ -1,3 +1,77 @@
+"""
+emilyqin@Emilys-MacBook-Air-42 ~ % source ~/.bash_profile
+emilyqin@Emilys-MacBook-Air-42 ~ % workon cv
+(cv) emilyqin@Emilys-MacBook-Air-42 ~ % pip install numpy h5py pillow scikit-image
+(cv) emilyqin@Emilys-MacBook-Air-42 ~ % pip install opencv-python
+(cv) emilyqin@Emilys-MacBook-Air-42 ~ % pip install dlib
+(cv) emilyqin@Emilys-MacBook-Air-42 ~ % pip install tensorflow
+(cv) emilyqin@Emilys-MacBook-Air-42 ~ % pip install keras
+(cv) emilyqin@Emilys-MacBook-Air-42 ~ % wget https://pjreddie.com/media/files/yolov3.weights
+(cv) emilyqin@Emilys-MacBook-Air-42 traffic-predictor % which python
+
+/Users/emilyqin/.virtualenvs/cv/bin/python
+
+*/2 * * * * /bin/bash -c 'source /Users/emilyqin/.virtualenvs/cv/bin/activate && /Users/emilyqin/.virtualenvs/cv/bin/python python main.py' >> 
+*/2 * * * * /bin/bash -c 'source /Users/emilyqin/.virtualenvs/cv/bin/activate && /Users/emilyqin/.virtualenvs/cv/bin/python /Users/emilyqin/Desktop/traffic-predictor/main.py' >> /Users/emilyqin/Desktop/traffic-predictor/logfile.log 2>&1
+correct cron?
+*/2 * * * * /bin/bash -c 'source /Users/emilyqin/.virtualenvs/cv/bin/activate && /Users/emilyqin/.virtualenvs/cv/bin/python /Users/emilyqin/Desktop/traffic-predictor/main.py' >> /Users/emilyqin/Desktop/traffic-predictor/logfile.log 2>&1
+
+*/2 * * * * /bin/bash -c 'source /path/to/your/virtualenv/bin/activate && /path/to/your/virtualenv/bin/python /path/to/your_script.py' >> /path/to/logfile.log 2>&1
+
+
+in runTrafficPredictor.sh:
+#!/bin/zsh
+source /Users/emilyqin/.virtualenvs/cv/bin/activate
+/Users/emilyqin/.virtualenvs/cv/bin/python /Users/emilyqin/Desktop/traffic-predictor/main.py >> /Users/emilyqin/Desktop/traffic-predictor/logfile.log 2>&1
+env > /Users/emilyqin/Desktop/traffic-predictor/env_variables.log
+
+correct cron: 
+2 * * * * /bin/zsh /Users/emilyqin/Desktop/traffic-predictor/runTrafficPredictor.sh >> /Users/emilyqin/Desktop/traffic-predictor/cronjob.log 2>&1
+
+com.demo.daemon.plist:
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.demo.daemon.plist</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StartInterval</key>
+    <integer>120</integer> <!-- Run every 2 minutes -->
+
+    <key>StandardErrorPath</key>
+    <string>/Users/emilyqin/Desktop/traffic-predictor/cronjob.log</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/emilyqin/Desktop/traffic-predictor/cronjob.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string><![CDATA[/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin]]></string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/emilyqin/Desktop/traffic-predictor</string>
+
+
+    <key>ProgramArguments</key>
+    <array>
+    <string>/bin/zsh</string>
+    <string>/Users/emilyqin/Desktop/traffic-predictor/runTrafficPredictor.sh</string>
+    </array>
+
+
+</dict>
+</plist>
+
+
+
+"""
+
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
@@ -8,6 +82,7 @@ import cv2
 import argparse
 import numpy as np
 import csv
+import os
 import datetime
 import time
 import schedule
@@ -36,19 +111,32 @@ def take_screenshot_and_update_csv():
     im = im.crop((left, top, (left + width) , (top + height)))
 
     # Save the cropped image
-    im.save('cropped_screenshot.png')
+    im.save('/Users/emilyqin/Desktop/traffic-predictor/cropped_screenshot.png')
 
     # Close the browser
     driver.quit()
-
-
     #time.sleep(3)
 
+
     # hardcoded paths to input image, config, weights, and classes
-    image_path = 'cropped_screenshot.png'
-    config_path = 'yolov3.cfg'
-    weights_path = 'yolov3.weights'
-    classes_path = 'yolov3.txt'
+    image_path = '/Users/emilyqin/Desktop/traffic-predictor/cropped_screenshot.png'
+    config_path = '/Users/emilyqin/Desktop/traffic-predictor/yolov3.cfg'
+    weights_path = '/Users/emilyqin/Desktop/traffic-predictor/yolov3.weights'
+    #print('before assignemnt')
+    classes_path = '/Users/emilyqin/Desktop/traffic-predictor/yolov3.txt'
+    #print ('after assignment')
+
+    #test
+    with open('/Users/emilyqin/Desktop/traffic-predictor/logfile.log', 'a') as log_file:
+        log_file.write(f"Image path: {image_path}\n")
+        log_file.write(f"Config path: {config_path}\n")
+        log_file.write(f"Weights path: {weights_path}\n")
+        log_file.write(f"Classes path: {classes_path}\n")
+        log_file.write(f"Does image path exist? {os.path.exists(image_path)}\n")
+    #end test
+
+    #print("Current Working Directory:", os.getcwd())
+    #print("Classes Path:", classes_path)
 
     # reading input image using opencv's imread function
     image = cv2.imread(image_path)
@@ -167,26 +255,29 @@ def take_screenshot_and_update_csv():
     date = x.strftime("%x")
     time = x.strftime("%X")
 
+    csvFilePath = '/Users/emilyqin/Desktop/traffic-predictor/information.csv'
     fields=[date,time,num_objects]
-    with open('information.csv', 'a') as f:
+    with open(csvFilePath, 'a') as f:
         writer = csv.writer(f)
         writer.writerow(fields)
 
-def job_scheduler():
+"""def job_scheduler():
     # Get the current time and day
     now = datetime.datetime.now()
     current_hour = now.hour
     current_day = now.weekday()  # Monday is 0 and Sunday is 6
 
     # Define conditions for Monday-Friday (0-4) and the two time ranges
-    if 0 <= current_day <= 4:
+    #if 0 <= current_day <= 4:
         # Run only between 7-9 AM or 3-5 PM
-        if (7 <= current_hour < 9) or (15 <= current_hour < 17):
-            take_screenshot_and_update_csv()
+        #if (7 <= current_hour < 9) or (15 <= current_hour < 17):
+    take_screenshot_and_update_csv()
 
 # Schedule the job every 2 minutes but only execute it during valid hours
 schedule.every(2).minutes.do(job_scheduler)
 
 while True:
     schedule.run_pending()
-    time.sleep(1)
+    time.sleep(1)"""
+
+take_screenshot_and_update_csv()
