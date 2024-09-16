@@ -1,8 +1,8 @@
-name: run main.py
+name: Run main.py
 
 on:
   schedule:
-  - cron: '*/2 * * * *'
+    - cron: '*/2 * * * *'
 
 jobs:
   build:
@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Updated to v3 to avoid the Node.js deprecation warning
+        uses: actions/checkout@v3
 
       - name: Install latest stable Google Chrome
         run: |
@@ -23,14 +23,23 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-glx  # Required by OpenCV
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install numpy h5py pillow scikit-image opencv-python dlib tensorflow keras
+
+      - name: Download YOLOv3 weights
+        run: |
+          wget https://pjreddie.com/media/files/yolov3.weights
 
       - name: Run Python script
         env:
-          WDM_LOG_LEVEL: 0  # Reduce log verbosity for WebDriverManager
+          WDM_LOG_LEVEL: 0
         run: python main.py
 
       - name: Commit and push updated files (if necessary)
@@ -45,3 +54,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
+
